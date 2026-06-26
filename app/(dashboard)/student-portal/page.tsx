@@ -77,18 +77,34 @@ export default async function StudentPortalPage() {
       // Resolve Student Profile from Clerk ID
       let studentProfile = null;
       if (userId && role === "STUDENT") {
-        const rows = await db
+        // First try: match by users.id directly (local auth bypass mode)
+        const rowsById = await db
           .select({
             student: students,
             user: users
           })
           .from(students)
           .innerJoin(users, eq(students.userId, users.id))
-          .where(and(eq(users.clerkUserId, userId), eq(students.instituteId, instituteId)))
+          .where(and(eq(users.id, userId), eq(students.instituteId, instituteId)))
           .limit(1);
-        
-        if (rows.length > 0) {
-          studentProfile = rows[0].student;
+
+        if (rowsById.length > 0) {
+          studentProfile = rowsById[0].student;
+        } else {
+          // Fallback: match by clerkUserId (Clerk auth mode)
+          const rowsByClerk = await db
+            .select({
+              student: students,
+              user: users
+            })
+            .from(students)
+            .innerJoin(users, eq(students.userId, users.id))
+            .where(and(eq(users.clerkUserId, userId), eq(students.instituteId, instituteId)))
+            .limit(1);
+
+          if (rowsByClerk.length > 0) {
+            studentProfile = rowsByClerk[0].student;
+          }
         }
       }
 

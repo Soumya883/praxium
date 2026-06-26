@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { userRegistrations } from "@/db/schema";
+import { userRegistrations, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -224,9 +224,24 @@ export async function loginUser(formData: FormData): Promise<LoginResult> {
       };
     }
 
-    // APPROVED — create session
+    // APPROVED — resolve actual users table record to get the correct userId
+    // (approveRegistration creates a users record with a new generatedUserId)
+    let resolvedUserId = user.id; // fallback to registration id
+    try {
+      const [dbUser] = await db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1);
+      if (dbUser) {
+        resolvedUserId = dbUser.id;
+      }
+    } catch {
+      // fallback to registration id if users lookup fails
+    }
+
     const payload: SessionPayload = {
-      userId: user.id,
+      userId: resolvedUserId,
       role: user.role as "TEACHER" | "STUDENT",
       name: user.name,
       email: user.email,
