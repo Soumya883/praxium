@@ -156,8 +156,11 @@ export async function loginUser(formData: FormData): Promise<LoginResult> {
     return { success: false, error: "Email and password are required." };
   }
 
+  const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const hasClerk = clerkKey && clerkKey.includes(".");
+  
   // 1. Bypass check for default Admin under local/mock dev when Clerk is offline
-  if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && email === "admin@praxium.edu") {
+  if (!hasClerk && email === "admin@praxium.edu") {
     const payload: SessionPayload = {
       userId: "usr_admin_01",
       role: "ADMIN",

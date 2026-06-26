@@ -7,8 +7,8 @@ export type Role = "ADMIN" | "TEACHER" | "STUDENT";
  * Supports local standalone testing if Clerk publishable keys are not set.
  */
 export async function checkRole(allowedRoles: Role[]): Promise<{ authorized: boolean; role: Role; userId: string | null }> {
-  // Bypasses checks if Clerk publishable key is not set to facilitate local evaluation
-  if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
+  const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  if (!clerkKey || !clerkKey.includes(".")) {
     try {
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
