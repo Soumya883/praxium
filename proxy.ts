@@ -1,14 +1,11 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-export const runtime = "nodejs";
-
-
 const isDashboardRoute = createRouteMatcher([
-  "/dashboard(.*)", 
-  "/students(.*)", 
-  "/batches(.*)", 
-  "/finance(.*)", 
+  "/dashboard(.*)",
+  "/students(.*)",
+  "/batches(.*)",
+  "/finance(.*)",
   "/settings(.*)",
   "/teacher(.*)",
   "/admin(.*)"
@@ -16,7 +13,7 @@ const isDashboardRoute = createRouteMatcher([
 
 const isStudentPortalRoute = createRouteMatcher(["/student-portal(.*)"]);
 
-export default function middleware(req: any, event: any) {
+export default function proxy(req: any, event: any) {
   // Bypass authentication if Clerk keys are not set or are mock keys in the environment
   const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   if (!clerkKey || !clerkKey.includes(".")) {
