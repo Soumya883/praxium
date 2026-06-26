@@ -1,6 +1,9 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
+export const runtime = "nodejs";
+
+
 const isDashboardRoute = createRouteMatcher([
   "/dashboard(.*)", 
   "/students(.*)", 
