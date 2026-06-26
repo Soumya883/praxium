@@ -6,8 +6,8 @@ import { eq } from "drizzle-orm";
 export async function getTenantDb() {
   let clerkOrgId = "mock_org_123";
 
-  // Check if Clerk keys are present
-  const hasClerk = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const hasClerk = !!(clerkKey && clerkKey.includes("."));
   
   if (hasClerk) {
     const session = await auth();
