@@ -1,0 +1,11 @@
+"use client";
+
+import React, { useState, useEffect, useTransition } from "react";
+import { getPendingRegistrations, approveRegistration, rejectRegistration } from "@/app/actions/registrations";
+import { db } from "@/db"; // Wait, can't import db directly in a client component!
+// Instead of importing db on the client, let's create a server action to fetch institutes!
+// Let's create a local server action or export one from registrations.ts!
+// Let's check: registrations.ts is a server actions file ("use server"). We can add getInstitutes() there!
+// Yes! Let's view registrations.ts and add getInstitutes to it or define it in a separate actions file.
+// Let's create app/actions/institutes.ts to get all institutes or put it directly in registrations.ts.
+// Putting it in registrations.ts is extremely clean. Let's do that in a moment.
