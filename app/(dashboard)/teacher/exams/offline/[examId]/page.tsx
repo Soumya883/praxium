@@ -12,7 +12,8 @@ export const metadata = {
   title: "Grade Offline Exam | Praxium",
 };
 
-export default async function GradeOfflineExamPage({ params }: { params: { examId: string } }) {
+export default async function GradeOfflineExamPage({ params }: { params: Promise<{ examId: string }> }) {
+  const { examId } = await params;
   let examData: any = null;
   let batchStudents: any[] = [];
   let existingScores: any[] = [];
@@ -43,7 +44,7 @@ export default async function GradeOfflineExamPage({ params }: { params: { examI
         batchId: instituteExams.batchId,
       })
       .from(instituteExams)
-      .where(eq(instituteExams.id, params.examId))
+      .where(eq(instituteExams.id, examId))
       .limit(1);
 
     if (!exam) {
@@ -51,7 +52,7 @@ export default async function GradeOfflineExamPage({ params }: { params: { examI
         <div className="py-6 max-w-5xl mx-auto">
           <div className="p-6 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 rounded-xl text-amber-700 space-y-2">
             <h2 className="font-bold">Exam Not Found</h2>
-            <p className="text-sm">The exam with ID <code className="bg-amber-100 px-1 rounded">{params.examId}</code> does not exist in the database.</p>
+            <p className="text-sm">The exam with ID <code className="bg-amber-100 px-1 rounded">{examId}</code> does not exist in the database.</p>
             <a href="/teacher/exams/offline" className="text-sm text-indigo-600 underline">← Back to Offline Exams</a>
           </div>
         </div>
@@ -103,7 +104,7 @@ export default async function GradeOfflineExamPage({ params }: { params: { examI
         remarks: examScores.remarks,
       })
       .from(examScores)
-      .where(eq(examScores.examId, params.examId));
+      .where(eq(examScores.examId, examId));
 
   } catch (error: any) {
     console.error("Failed to load exam grading data", error);
