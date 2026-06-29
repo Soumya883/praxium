@@ -9,7 +9,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 const createOfflineExamSchema = z.object({
-  batchId: z.string().uuid(),
+  batchId: z.string().min(1, "Batch is required"),
   subject: z.string().min(1, "Subject is required"),
   maxMarks: z.number().positive(),
   date: z.string(),
@@ -50,13 +50,13 @@ export async function createOfflineExam(data: z.infer<typeof createOfflineExamSc
 }
 
 const scoreEntrySchema = z.object({
-  studentId: z.string().uuid(),
+  studentId: z.string().min(1),
   marksObtained: z.number().min(0),
   remarks: z.string().optional(),
 });
 
 const uploadScoresSchema = z.object({
-  examId: z.string().uuid(),
+  examId: z.string().min(1),
   scores: z.array(scoreEntrySchema),
 });
 
@@ -69,7 +69,8 @@ export async function uploadExamScores(data: z.infer<typeof uploadScoresSchema>)
 
     const validated = uploadScoresSchema.safeParse(data);
     if (!validated.success) {
-      return { success: false, error: "Invalid score data submitted." };
+      const firstError = validated.error.issues[0];
+      return { success: false, error: firstError?.message || "Invalid score data submitted." };
     }
 
     const { instituteId } = await getTenantDb();
