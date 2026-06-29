@@ -245,6 +245,7 @@ export default async function StudentPortalPage() {
             subject: instituteExams.subject,
             maxMarks: instituteExams.maxMarks,
             marksObtained: examScores.marksObtained,
+            remarks: examScores.remarks,
           })
           .from(instituteExams)
           .leftJoin(
@@ -260,9 +261,12 @@ export default async function StudentPortalPage() {
           const studentMark = ex.marksObtained ? parseFloat(ex.marksObtained) : 0;
           const classAvg = Math.round(ex.maxMarks * 0.76);
           return {
+            id: ex.id,
             subject: ex.subject,
             studentScore: studentMark || Math.round(ex.maxMarks * 0.8),
+            maxMarks: ex.maxMarks,
             classAverage: classAvg,
+            remarks: ex.remarks || null,
           };
         });
 

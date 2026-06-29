@@ -75,9 +75,12 @@ interface StudentPortalClientProps {
     percentage: number;
   }[];
   examsPerformance: {
+    id: string;
     subject: string;
     studentScore: number;
+    maxMarks: number;
     classAverage: number;
+    remarks: string | null;
   }[];
   paymentsList: {
     id: string;
@@ -211,6 +214,41 @@ export function StudentPortalClient({
                 <Bar dataKey="Batch Average" fill="#94a3b8" radius={[4, 4, 0, 0]} barSize={24} />
               </BarChart>
             </ResponsiveContainer>
+            
+            {/* Detailed Exam Marks List */}
+            <div className="mt-8 px-6 space-y-3">
+              <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest block">Detailed Marks & Remarks</span>
+              <div className="border border-neutral-100 dark:border-neutral-900 rounded-xl overflow-hidden text-xs bg-neutral-50/20 dark:bg-neutral-950/20">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-neutral-50 dark:bg-neutral-900/40 text-[10px] text-neutral-500 font-bold uppercase border-b border-neutral-100 dark:border-neutral-900">
+                      <th className="p-3">Exam Subject</th>
+                      <th className="p-3">Marks Obtained</th>
+                      <th className="p-3">Class Average</th>
+                      <th className="p-3">Teacher Remarks</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {examsPerformance.length > 0 ? (
+                      examsPerformance.map(ex => (
+                        <tr key={ex.id || ex.subject} className="border-b border-neutral-100 dark:border-neutral-900 hover:bg-neutral-50/50 dark:hover:bg-neutral-900/10">
+                          <td className="p-3 font-semibold text-neutral-800 dark:text-neutral-200">{ex.subject}</td>
+                          <td className="p-3 font-bold text-indigo-600 dark:text-indigo-400">{ex.studentScore} / {ex.maxMarks || 100}</td>
+                          <td className="p-3 text-neutral-500">{ex.classAverage}</td>
+                          <td className="p-3 text-neutral-500 italic max-w-[200px] truncate" title={ex.remarks || "No remarks provided."}>
+                            {ex.remarks || "—"}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={4} className="p-4 text-center text-neutral-400 italic">No exams recorded yet.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </CardContent>
         </Card>
 

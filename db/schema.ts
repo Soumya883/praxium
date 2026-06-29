@@ -6,7 +6,7 @@ export const roleEnum = pgEnum("role", ["ADMIN", "TEACHER", "STUDENT"]);
 export const statusEnum = pgEnum("status", ["active", "inactive", "suspended"]);
 export const paymentStatusEnum = pgEnum("payment_status", ["paid", "pending", "overdue"]);
 export const attendanceStatusEnum = pgEnum("attendance_status", ["present", "absent", "late"]);
-export const commTypeEnum = pgEnum("comm_type", ["ATTENDANCE_WARNING", "FEE_REMINDER", "GENERAL"]);
+export const commTypeEnum = pgEnum("comm_type", ["ATTENDANCE_WARNING", "FEE_REMINDER", "GENERAL", "EXAM_RESULT"]);
 export const paymentModeEnum = pgEnum("payment_mode", ["CASH", "UPI", "BANK_TRANSFER", "CARD"]);
 export const registrationStatusEnum = pgEnum("registration_status", ["PENDING", "APPROVED", "REJECTED"]);
 
@@ -178,6 +178,7 @@ export const examScores = pgTable("exam_scores", {
   examId: uuid("exam_id").notNull().references(() => instituteExams.id, { onDelete: "cascade" }),
   studentId: uuid("student_id").notNull().references(() => students.id, { onDelete: "cascade" }),
   marksObtained: decimal("marks_obtained", { precision: 5, scale: 2 }).notNull(),
+  remarks: text("remarks"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   instituteId: uuid("institute_id").references(() => institutes.id, { onDelete: "cascade" }),
 }, (table) => {
