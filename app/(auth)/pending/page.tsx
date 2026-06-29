@@ -5,7 +5,9 @@ import { useUser, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { Clock, RefreshCw, LogOut } from "lucide-react";
 
-export default function PendingPage() {
+const hasClerk = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.startsWith("pk_");
+
+function ClerkPendingPage() {
   const { isLoaded, user } = useUser();
   const { signOut } = useClerk();
   const router = useRouter();
@@ -77,4 +79,37 @@ export default function PendingPage() {
       </div>
     </div>
   );
+}
+
+function MockPendingPage() {
+  const router = useRouter();
+  return (
+    <div className="space-y-6 text-center">
+      <div className="flex justify-center">
+        <div className="h-16 w-16 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20 shadow-lg shadow-amber-500/5 animate-pulse">
+          <Clock className="h-8 w-8" />
+        </div>
+      </div>
+      <div className="space-y-2">
+        <h2 className="text-xl font-bold tracking-tight text-white font-sans">Review Pending</h2>
+        <p className="text-sm text-neutral-400 max-w-xs mx-auto leading-relaxed font-sans">
+          Your request is currently awaiting administrator approval. (Mock Mode)
+        </p>
+      </div>
+      <button
+        onClick={() => router.push("/login")}
+        className="w-full py-2.5 bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 hover:text-white text-neutral-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition"
+      >
+        <LogOut className="h-4 w-4" />
+        <span>Return to Login</span>
+      </button>
+    </div>
+  );
+}
+
+export default function PendingPage() {
+  if (hasClerk) {
+    return <ClerkPendingPage />;
+  }
+  return <MockPendingPage />;
 }

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Search, SlidersHorizontal, ChevronLeft, ChevronRight, MoreHorizontal, Loader2 } from "lucide-react";
 import { 
   Table, 
@@ -37,6 +38,7 @@ interface StudentsClientProps {
 }
 
 export function StudentsClient({ initialStudents, batches }: StudentsClientProps) {
+  const router = useRouter();
   const [students, setStudents] = React.useState<EnrolledStudent[]>(initialStudents);
   const [search, setSearch] = React.useState("");
   const [batchFilter, setBatchFilter] = React.useState("all");
@@ -203,6 +205,13 @@ export function StudentsClient({ initialStudents, batches }: StudentsClientProps
                         <span className="sr-only">Open menu</span>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-900 text-neutral-900 dark:text-neutral-200 text-xs">
+                        <DropdownMenuItem 
+                          className="cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-900 focus:bg-neutral-100 dark:focus:bg-neutral-900"
+                          onClick={() => router.push(`/admin/students/${student.id}`)}
+                        >
+                          Manage Profile & Batch
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator className="bg-neutral-200 dark:bg-neutral-900" />
                         <DropdownMenuItem 
                           className="cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-900 focus:bg-neutral-100 dark:focus:bg-neutral-900"
                           onClick={() => handleStatusChange(student.id, student.status === "active" ? "inactive" : "active")}

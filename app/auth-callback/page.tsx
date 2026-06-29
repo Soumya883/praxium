@@ -6,7 +6,9 @@ import { useRouter } from "next/navigation";
 import { handleAuthCallbackAction } from "@/app/actions/auth-callback";
 import { ShieldAlert, LogOut } from "lucide-react";
 
-export default function AuthCallbackPage() {
+const hasClerk = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.startsWith("pk_");
+
+function ClerkAuthCallbackPage() {
   const { isLoaded, isSignedIn, user } = useUser();
   const { signOut } = useClerk();
   const router = useRouter();
@@ -100,4 +102,25 @@ export default function AuthCallbackPage() {
       <p className="text-xs text-neutral-400 tracking-wide font-medium">Setting up your secure portal session...</p>
     </div>
   );
+}
+
+function MockAuthCallbackPage() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace("/dashboard");
+  }, [router]);
+
+  return (
+    <div className="min-h-screen bg-[#060608] flex flex-col items-center justify-center space-y-4 font-sans text-neutral-200">
+      <div className="h-9 w-9 border-4 border-indigo-500/10 border-t-indigo-500 rounded-full animate-spin" />
+      <p className="text-xs text-neutral-400 tracking-wide font-medium">Redirecting to mock dashboard...</p>
+    </div>
+  );
+}
+
+export default function AuthCallbackPage() {
+  if (hasClerk) {
+    return <ClerkAuthCallbackPage />;
+  }
+  return <MockAuthCallbackPage />;
 }
