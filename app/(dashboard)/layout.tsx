@@ -19,7 +19,8 @@ import {
   TrendingUp,
   Kanban,
   UserCheck,
-  Shield
+  Shield,
+  FileText
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -36,6 +37,7 @@ const ALL_NAVIGATION = [
   { name: "Control Panel", href: "/admin/manage", icon: Shield, roles: ["ADMIN"] },
   { name: "Students", href: "/students", icon: Users, roles: ["ADMIN", "TEACHER"] },
   { name: "Batches", href: "/academic", icon: BookOpen, roles: ["ADMIN", "TEACHER"] },
+  { name: "Offline Exams", href: "/teacher/exams/offline", icon: FileText, roles: ["ADMIN", "TEACHER"] },
   { name: "Finance", href: "/finance", icon: CreditCard, roles: ["ADMIN"] },
   { name: "Teacher Assignments", href: "/teacher/assignments", icon: ClipboardList, roles: ["ADMIN", "TEACHER"] },
   { name: "Student Portal", href: "/student-portal", icon: GraduationCap, roles: ["ADMIN", "STUDENT"] },
