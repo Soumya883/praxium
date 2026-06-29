@@ -281,7 +281,6 @@ export async function resetDemoEnvironment(): Promise<{ success: boolean; messag
           const amount = (3000 + (i * 100) + (mIdx * 200)).toFixed(2);
           
           paymentsList.push({
-            id: `pay_invoice_${i}_m_${mIdx}`,
             studentId,
             amount,
             status: (isPaid ? "paid" : (mIdx < 4 ? "overdue" : "pending")) as any,

@@ -143,9 +143,8 @@ export async function recordPayment(
         })
         .where(and(eq(payments.id, paymentId), eq(payments.instituteId, instituteId)));
     } else {
-      resolvedPaymentId = "pay_" + Math.random().toString(36).substring(2, 11);
-      await db.insert(payments).values({
-        id: resolvedPaymentId,
+      // Let the DB auto-generate a UUID for id (schema uses defaultRandom())
+      const [inserted] = await db.insert(payments).values({
         studentId,
         amount: validated.data.amount.toString(),
         status: "paid",
@@ -155,7 +154,8 @@ export async function recordPayment(
         paymentMode: validated.data.paymentMode,
         receiptNumber: receipt,
         instituteId,
-      });
+      }).returning({ id: payments.id });
+      resolvedPaymentId = inserted?.id ?? "";
     }
 
     // Dispatch WhatsApp receipt to parent/guardian if checkbox enabled
