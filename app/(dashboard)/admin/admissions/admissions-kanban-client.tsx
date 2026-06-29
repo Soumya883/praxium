@@ -137,8 +137,26 @@ function formatDate(date: Date | string | null): string {
   });
 }
 
-// --- Add Walk-in Dialog ---
-function AddWalkinDialog({ onAdd }: { onAdd: (inquiry: Inquiry) => void }) {
+// --- Add Lead Dialog (supports any status) ---
+const STATUS_LABELS: Record<string, string> = {
+  NEW_WALKIN: "New Walk-in",
+  CALLED: "Called",
+  TRIAL_SCHEDULED: "Trial Scheduled",
+  ENROLLED: "Enrolled",
+  LOST: "Lost",
+};
+
+function AddLeadDialog({
+  onAdd,
+  defaultStatus,
+  triggerLabel,
+  triggerVariant = "default",
+}: {
+  onAdd: (inquiry: Inquiry) => void;
+  defaultStatus?: InquiryStatus;
+  triggerLabel?: React.ReactNode;
+  triggerVariant?: "default" | "ghost";
+}) {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [form, setForm] = React.useState({
@@ -147,28 +165,35 @@ function AddWalkinDialog({ onAdd }: { onAdd: (inquiry: Inquiry) => void }) {
     targetCourse: "",
     followUpDate: "",
     notes: "",
+    status: (defaultStatus ?? "NEW_WALKIN") as InquiryStatus,
   });
+
+  // Reset form status when defaultStatus changes (e.g. different column button clicked)
+  React.useEffect(() => {
+    if (open) {
+      setForm((f) => ({ ...f, status: defaultStatus ?? "NEW_WALKIN" }));
+    }
+  }, [open, defaultStatus]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await createNewInquiry(form);
+      const res = await createNewInquiry({ ...form });
       if (res.success) {
-        // Optimistic: create a mock inquiry for immediate UI update
         const mockInquiry: Inquiry = {
           id: `temp-${Date.now()}`,
           studentName: form.studentName,
           guardianPhone: form.guardianPhone,
           targetCourse: form.targetCourse,
-          status: "NEW_WALKIN",
+          status: form.status,
           followUpDate: form.followUpDate ? new Date(form.followUpDate) : null,
           notes: form.notes || null,
           createdAt: new Date(),
         };
         onAdd(mockInquiry);
         setOpen(false);
-        setForm({ studentName: "", guardianPhone: "", targetCourse: "", followUpDate: "", notes: "" });
+        setForm({ studentName: "", guardianPhone: "", targetCourse: "", followUpDate: "", notes: "", status: defaultStatus ?? "NEW_WALKIN" });
       } else {
         alert("Error: " + res.error);
       }
@@ -177,27 +202,55 @@ function AddWalkinDialog({ onAdd }: { onAdd: (inquiry: Inquiry) => void }) {
     }
   };
 
+  const trigger = triggerVariant === "ghost" ? (
+    <button
+      type="button"
+      className="h-6 w-6 flex items-center justify-center rounded-md hover:bg-white/60 dark:hover:bg-neutral-800/60 text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100 transition cursor-pointer"
+      title={`Add to ${STATUS_LABELS[form.status]}`}
+    >
+      <Plus className="h-3.5 w-3.5" />
+    </button>
+  ) : (
+    <Button
+      className="bg-neutral-950 text-white dark:bg-white dark:text-neutral-950 text-xs font-semibold h-9 px-4 flex items-center gap-1.5 cursor-pointer"
+      id="add-lead-btn"
+    >
+      <Plus className="h-4 w-4" />
+      Add Lead
+    </Button>
+  );
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        render={
-          <Button
-            className="bg-neutral-950 text-white dark:bg-white dark:text-neutral-950 text-xs font-semibold h-9 px-4 flex items-center gap-1.5 cursor-pointer"
-            id="add-walkin-btn"
-          >
-            <Plus className="h-4 w-4" />
-            Add Walk-in
-          </Button>
-        }
-      />
+      <DialogTrigger render={trigger} />
       <DialogContent className="bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-900 max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-base font-bold">New Walk-in Lead</DialogTitle>
+          <DialogTitle className="text-base font-bold">New CRM Lead</DialogTitle>
           <DialogDescription className="text-xs text-neutral-500">
-            Capture a new inquiry from a walk-in student or phone call.
+            Add a new lead to any stage of your admissions pipeline.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+          {/* Status Selector */}
+          <div className="space-y-1.5">
+            <Label htmlFor="leadStatus" className="text-xs text-neutral-500">Stage / Status</Label>
+            <Select
+              value={form.status}
+              onValueChange={(v) => setForm((f) => ({ ...f, status: v as InquiryStatus }))}
+            >
+              <SelectTrigger id="leadStatus" className="h-9 text-xs bg-neutral-50 dark:bg-neutral-900">
+                <SelectValue placeholder="Select stage" />
+              </SelectTrigger>
+              <SelectContent className="bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-900">
+                {Object.entries(STATUS_LABELS).map(([val, label]) => (
+                  <SelectItem key={val} value={val} className="text-xs">
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="space-y-1.5">
             <Label htmlFor="studentName" className="text-xs text-neutral-500">Student Name</Label>
             <Input
@@ -265,6 +318,7 @@ function AddWalkinDialog({ onAdd }: { onAdd: (inquiry: Inquiry) => void }) {
     </Dialog>
   );
 }
+
 
 // --- Lead Detail Sheet ---
 function LeadDetailSheet({
@@ -610,7 +664,7 @@ export function AdmissionsKanbanClient({
             );
           })}
         </div>
-        <AddWalkinDialog onAdd={handleAddInquiry} />
+        <AddLeadDialog onAdd={handleAddInquiry} />
       </div>
 
       {/* Kanban Board */}
@@ -629,9 +683,16 @@ export function AdmissionsKanbanClient({
                     <div className={`h-2.5 w-2.5 rounded-full ${col.dotColor}`} />
                     <span className={`text-xs font-bold ${col.color}`}>{col.label}</span>
                   </div>
-                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-white/60 dark:bg-neutral-950/60 ${col.color}`}>
-                    {colInquiries.length}
-                  </span>
+                  <div className="flex items-center gap-1">
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-white/60 dark:bg-neutral-950/60 ${col.color}`}>
+                      {colInquiries.length}
+                    </span>
+                    <AddLeadDialog
+                      onAdd={handleAddInquiry}
+                      defaultStatus={col.id}
+                      triggerVariant="ghost"
+                    />
+                  </div>
                 </div>
 
                 {/* Droppable Area */}

@@ -59,7 +59,7 @@ export async function createNewInquiry(
       studentName: parsed.data.studentName,
       guardianPhone: parsed.data.guardianPhone,
       targetCourse: parsed.data.targetCourse,
-      status: "NEW_WALKIN",
+      status: parsed.data.status ?? "NEW_WALKIN",
       followUpDate: parsed.data.followUpDate
         ? new Date(parsed.data.followUpDate)
         : null,

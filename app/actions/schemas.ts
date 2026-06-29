@@ -73,6 +73,7 @@ export const createInquirySchema = z.object({
   targetCourse: z.string().min(2, "Target course is required"),
   followUpDate: z.string().optional(),
   notes: z.string().optional(),
+  status: z.enum(["NEW_WALKIN", "CALLED", "TRIAL_SCHEDULED", "ENROLLED", "LOST"]).optional(),
 });
 
 export const updateInquiryNotesSchema = z.object({
