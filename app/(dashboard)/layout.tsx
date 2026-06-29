@@ -24,8 +24,9 @@ import {
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserButton } from "@/components/auth-wrapper";
+import Footer from "@/components/Footer";
 
-const hasClerk = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.includes(".");
+const hasClerk = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.startsWith("pk_");
 
 const ALL_NAVIGATION = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: ["ADMIN"] },
@@ -145,6 +146,7 @@ function DashboardLayoutInner({ children, role }: DashboardLayoutInnerProps) {
           <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-300">
             {children}
           </div>
+          <Footer />
         </main>
       </div>
 
@@ -202,7 +204,19 @@ function DashboardLayoutInner({ children, role }: DashboardLayoutInnerProps) {
 }
 
 function DashboardLayoutWithClerk({ children }: { children: React.ReactNode }) {
-  const { user } = useUser();
+  const { isLoaded, user } = useUser();
+  
+  if (!isLoaded) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-neutral-950 text-neutral-400">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
+          <p className="text-xs">Verifying authorization...</p>
+        </div>
+      </div>
+    );
+  }
+
   const role = (user?.publicMetadata?.role as string) || "STUDENT";
   return <DashboardLayoutInner role={role}>{children}</DashboardLayoutInner>;
 }

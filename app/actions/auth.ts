@@ -157,7 +157,7 @@ export async function loginUser(formData: FormData): Promise<LoginResult> {
   }
 
   const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-  const hasClerk = clerkKey && clerkKey.includes(".");
+  const hasClerk = !!(clerkKey && clerkKey.startsWith("pk_"));
   
   // 1. Bypass check for default Admin under local/mock dev when Clerk is offline
   if (!hasClerk && email === "admin@praxium.edu") {

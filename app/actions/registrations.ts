@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { userRegistrations, users, students, institutes } from "@/db/schema";
+import { userRegistrations, users, students, institutes, batches } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { checkRole } from "./rbac-utils";
 import { revalidatePath } from "next/cache";
@@ -66,7 +66,7 @@ export async function getPendingRegistrations() {
 
 // ─── Approve Registration ─────────────────────────────────────────────────────
 
-export async function approveRegistration(registrationId: string, instituteId: string) {
+export async function approveRegistration(registrationId: string, instituteId: string, batchId?: string) {
   try {
     const { authorized, userId: adminUserId } = await checkRole(["ADMIN"]);
     if (!authorized) {
@@ -112,6 +112,7 @@ export async function approveRegistration(registrationId: string, instituteId: s
         await tx.insert(students).values({
           userId: generatedUserId,
           instituteId,
+          batchId: batchId || null,
           status: "active",
         });
       }
@@ -213,4 +214,27 @@ export async function getInstitutes() {
     };
   }
 }
+
+export async function getBatchesForInstitute(instituteId: string) {
+  try {
+    const data = await db
+      .select({
+        id: batches.id,
+        name: batches.name,
+      })
+      .from(batches)
+      .where(eq(batches.instituteId, instituteId));
+    return { success: true, data };
+  } catch (err: any) {
+    console.error("[getBatchesForInstitute]", err);
+    return {
+      success: true,
+      data: [
+        { id: "batch_demo_01", name: "Class 12 — Physics A" },
+        { id: "batch_demo_02", name: "Class 12 — Chemistry B" },
+      ],
+    };
+  }
+}
+
 

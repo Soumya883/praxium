@@ -16,7 +16,7 @@ const isStudentPortalRoute = createRouteMatcher(["/student-portal(.*)"]);
 export default function proxy(req: any, event: any) {
   // Bypass authentication if Clerk keys are not set or are mock keys in the environment
   const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-  if (!clerkKey || !clerkKey.includes(".")) {
+  if (!clerkKey || !clerkKey.startsWith("pk_")) {
     return NextResponse.next();
   }
 

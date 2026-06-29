@@ -6,7 +6,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-  const hasClerk = clerkKey && clerkKey.includes(".");
+  console.log("[Providers] NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:", clerkKey ? `defined (starts with: ${clerkKey.substring(0, 10)})` : "undefined");
+  const hasClerk = !!clerkKey && clerkKey.startsWith("pk_");
 
   if (hasClerk) {
     return (

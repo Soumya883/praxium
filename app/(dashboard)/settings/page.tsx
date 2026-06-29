@@ -28,8 +28,8 @@ export default function SettingsPage() {
   const [isResetting, setIsResetting] = React.useState(false);
 
   // Clerk setup
-  const clerkKey = typeof window !== "undefined" ? process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY : "";
-  const hasClerk = clerkKey && clerkKey.includes(".");
+  const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "";
+  const hasClerk = !!clerkKey && clerkKey.startsWith("pk_");
   
   let clerkUser: any = null;
   try {

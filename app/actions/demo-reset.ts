@@ -13,7 +13,7 @@ export async function resetDemoEnvironment(): Promise<{ success: boolean; messag
   try {
     // 1. Authorize the user (check that email matches the founder's account)
     const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-    const hasClerk = clerkKey && clerkKey.includes(".");
+    const hasClerk = !!(clerkKey && clerkKey.startsWith("pk_"));
     
     let isAuthorized = false;
 

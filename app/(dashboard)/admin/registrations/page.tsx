@@ -5,7 +5,8 @@ import {
   getPendingRegistrations, 
   approveRegistration, 
   rejectRegistration, 
-  getInstitutes 
+  getInstitutes,
+  getBatchesForInstitute
 } from "@/app/actions/registrations";
 import { 
   UserCheck, 
@@ -46,6 +47,10 @@ export default function AdminRegistrationsPage() {
   // Modals / Actions states
   const [approvingItem, setApprovingItem] = useState<PendingRequest | null>(null);
   const [selectedInstId, setSelectedInstId] = useState<string>("");
+  const [batches, setBatches] = useState<{ id: string; name: string }[]>([]);
+  const [selectedBatchId, setSelectedBatchId] = useState<string>("");
+  const [loadingBatches, setLoadingBatches] = useState(false);
+
   const [rejectingItem, setRejectingItem] = useState<PendingRequest | null>(null);
   const [rejectionReason, setRejectionReason] = useState<string>("");
 
@@ -84,12 +89,36 @@ export default function AdminRegistrationsPage() {
     loadData();
   }, []);
 
+  useEffect(() => {
+    if (selectedInstId && approvingItem?.role === "STUDENT") {
+      setLoadingBatches(true);
+      getBatchesForInstitute(selectedInstId)
+        .then((res) => {
+          if (res.success) {
+            setBatches(res.data || []);
+            if (res.data && res.data.length > 0) {
+              setSelectedBatchId(res.data[0].id);
+            } else {
+              setSelectedBatchId("");
+            }
+          }
+        })
+        .finally(() => {
+          setLoadingBatches(false);
+        });
+    } else {
+      setBatches([]);
+      setSelectedBatchId("");
+    }
+  }, [selectedInstId, approvingItem]);
+
   const handleApproveSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!approvingItem) return;
 
     startTransition(async () => {
-      const res = await approveRegistration(approvingItem.id, selectedInstId);
+      const batchIdToAssign = approvingItem.role === "STUDENT" && selectedBatchId ? selectedBatchId : undefined;
+      const res = await approveRegistration(approvingItem.id, selectedInstId, batchIdToAssign);
       if (res.success) {
         setApprovingItem(null);
         loadData();
@@ -270,8 +299,37 @@ export default function AdminRegistrationsPage() {
                 </select>
               </div>
 
+              {approvingItem.role === "STUDENT" && (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-neutral-400 uppercase tracking-wider block">
+                    Assign Batch
+                  </label>
+                  {loadingBatches ? (
+                    <div className="w-full px-3.5 py-2.5 bg-neutral-900 border border-neutral-800 rounded-xl text-xs text-neutral-400">
+                      Loading batches...
+                    </div>
+                  ) : batches.length > 0 ? (
+                    <select
+                      value={selectedBatchId}
+                      onChange={(e) => setSelectedBatchId(e.target.value)}
+                      className="w-full px-3.5 py-2.5 bg-neutral-900 border border-neutral-800 rounded-xl text-sm text-neutral-200 focus:outline-none focus:border-indigo-500"
+                    >
+                      {batches.map((b) => (
+                        <option key={b.id} value={b.id}>
+                          {b.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="text-xs text-amber-400 bg-amber-950/20 border border-amber-900/30 p-3 rounded-lg leading-relaxed">
+                      No batches found for this institute. You can still approve, and assign a batch later, or create a batch in Academic settings first.
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="text-xs text-neutral-500 leading-relaxed bg-neutral-900/40 p-3 rounded-lg border border-neutral-900">
-                Approving this request will provision the user in the selected institute. If the applicant is a student, their student record will be auto-generated.
+                Approving this request will provision the user in the selected institute. If the applicant is a student, their student record will be auto-generated{approvingItem.role === "STUDENT" ? " and assigned to the selected batch." : "."}
               </div>
 
               <div className="flex gap-3 pt-2">

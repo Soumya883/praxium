@@ -6,9 +6,7 @@ import { useRouter } from "next/navigation";
 import { GraduationCap, ArrowRight, Building2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const hasClerk = typeof window !== "undefined"
-  ? (!!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.includes("."))
-  : false;
+const hasClerk = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.startsWith("pk_");
 
 function ClerkSelectOrgContainer() {
   const router = useRouter();

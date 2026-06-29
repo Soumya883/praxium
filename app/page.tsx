@@ -407,7 +407,10 @@ export default function MarketingLandingPage() {
             <GraduationCap className="h-4.5 w-4.5" />
             <span>Praxium ERP</span>
           </div>
-          <span>© {new Date().getFullYear()} Praxium Inc. All rights reserved.</span>
+          <div className="flex flex-col sm:items-end items-center gap-1">
+            <span>© {new Date().getFullYear()} Praxium Inc. All rights reserved.</span>
+            <span className="text-neutral-600 dark:text-neutral-400">Made by Soumya Ranjan Behura</span>
+          </div>
         </div>
       </footer>
 

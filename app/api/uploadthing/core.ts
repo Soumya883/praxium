@@ -10,7 +10,7 @@ export const ourFileRouter = {
   })
     .middleware(async () => {
       const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-      const hasClerk = !!(clerkKey && clerkKey.includes("."));
+      const hasClerk = !!(clerkKey && clerkKey.startsWith("pk_"));
       
       let userId = "mock_user_123";
       let role = "STUDENT";

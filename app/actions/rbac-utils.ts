@@ -1,4 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
+import { db } from "@/db";
+import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export type Role = "ADMIN" | "TEACHER" | "STUDENT";
 
@@ -8,7 +11,7 @@ export type Role = "ADMIN" | "TEACHER" | "STUDENT";
  */
 export async function checkRole(allowedRoles: Role[]): Promise<{ authorized: boolean; role: Role; userId: string | null }> {
   const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-  if (!clerkKey || !clerkKey.includes(".")) {
+  if (!clerkKey || !clerkKey.startsWith("pk_")) {
     try {
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
@@ -48,8 +51,24 @@ export async function checkRole(allowedRoles: Role[]): Promise<{ authorized: boo
   }
 
   const session = await auth();
-  const role = session.sessionClaims?.metadata?.role as Role | undefined;
+  let role = session.sessionClaims?.metadata?.role as Role | undefined;
   const userId = session.userId;
+
+  // Fallback to database lookup if Clerk token metadata is not set/synced yet
+  if (userId && !role) {
+    try {
+      const [dbUser] = await db
+        .select({ role: users.role })
+        .from(users)
+        .where(eq(users.clerkUserId, userId))
+        .limit(1);
+      if (dbUser) {
+        role = dbUser.role as Role;
+      }
+    } catch (e) {
+      console.error("Failed to query user role from DB in checkRole:", e);
+    }
+  }
 
   if (!role || !allowedRoles.includes(role)) {
     return { authorized: false, role: role || "STUDENT", userId };
@@ -57,3 +76,4 @@ export async function checkRole(allowedRoles: Role[]): Promise<{ authorized: boo
 
   return { authorized: true, role, userId };
 }
+

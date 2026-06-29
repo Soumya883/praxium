@@ -7,7 +7,7 @@ export async function getTenantDb() {
   let clerkOrgId = "mock_org_123";
 
   const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-  const hasClerk = !!(clerkKey && clerkKey.includes("."));
+  const hasClerk = !!(clerkKey && clerkKey.startsWith("pk_"));
   
   if (hasClerk) {
     const session = await auth();
